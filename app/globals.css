@@ -3,6 +3,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Theme: white gradient (change --gradient to restyle everything) */
+  --gradient: linear-gradient(160deg, #ffffff 0%, #eef1f7 100%);
+  --ink: #14171f;
+  --muted: #5d6475;
+  --line: #d9dce3;
+  --surface: #ffffff;
+  --accent: #3b4bdb;
+  --error-bg: #fdecec;
+  --error-ink: #9b1c1c;
+
+  /* Net worth colors: low (red) / mid (orange) / high (green) */
+  --net-low: #ef3022;
+  --net-mid: #fdca40;
+  --net-high: #3ea84b;
 }
 
 @theme inline {
@@ -12,15 +27,226 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
+  min-height: 100vh;
+  background: var(--gradient) fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ---------- Login page ---------- */
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.content {
+  width: 100%;
+  max-width: 360px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.lead {
+  margin: 0 0 28px;
+  color: var(--muted);
+}
+
+.googleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(20, 23, 31, 0.06);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.googleBtn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(20, 23, 31, 0.08);
+}
+
+.googleBtn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.googleBtn svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.note {
+  margin: 16px 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.error {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--error-bg);
+  color: var(--error-ink);
+  font-size: 0.9rem;
+}
+
+/* ---------- 3D scene (dashboard) ---------- */
+
+.scene-wrap {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: var(--gradient);
+  overflow: hidden;
+}
+
+.scene-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.scene-menu {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none; /* the empty strip doesn't block dragging the scene */
+}
+
+.scene-menu button {
+  pointer-events: auto;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(20, 23, 31, 0.06);
+  transition: border-color 0.15s;
+}
+
+.scene-menu button:hover {
+  border-color: var(--accent);
+}
+
+.scene-menu button:active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Cards: the code sets --tier (red / orange / green) from the net worth */
+
+.element {
+  --tier: var(--net-mid);
+  width: 120px;
+  height: 160px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--tier) 30%, white);
+  border: 1px solid var(--tier);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--tier) 40%, transparent);
+  font-family: Helvetica, sans-serif;
+  text-align: center;
+  line-height: normal;
+  cursor: default;
+}
+
+.element:hover {
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--tier) 70%, transparent);
+}
+
+.element .photo {
+  display: block;
+  width: 100%;
+  height: 72px;
+  object-fit: cover;
+  border-bottom: 1px solid rgba(20, 23, 31, 0.1);
+}
+
+.element .name {
+  margin: 8px 6px 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.element .meta {
+  margin: 4px 6px 0;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.element .worth {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--ink);
+}
+
+/* Net worth legend (bottom-right) */
+
+.legend {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.legend-bar {
+  width: 140px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--net-low),
+    var(--net-mid),
+    var(--net-high)
+  );
 }
