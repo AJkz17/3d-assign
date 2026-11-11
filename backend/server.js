@@ -104,4 +104,25 @@ app.post('/auth/logout', (req, res, next) => {
 // Current user (the frontend calls this)
 app.get('/api/me', requireAuth, (req, res) => res.json(req.user));
 
+// Current user (the frontend calls this)
+app.get('/api/me', requireAuth, (req, res) => res.json(req.user));
+
+// TEMPORARY: remove after testing
+app.get('/health/db', async (req, res) => {
+  try {
+    const { rows } = await pool.query('select now()');
+    res.json({ ok: true, time: rows[0].now });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// Vercel runs the app as a serverless function, so export it
+module.exports = app;
+
+// Only start a server when running locally with `node server.js`
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Backend listening on port ${PORT}`));
+}
+
 app.listen(PORT, () => console.log(`Backend running on ${BACKEND_URL}`));
