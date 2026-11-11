@@ -10,11 +10,8 @@ import {
   CSS3DObject,
 } from "three/addons/renderers/CSS3DRenderer.js";
 
-// Published Google Sheet CSV link (set in .env.local) or a CSV file in /public
 const DATA_URL = process.env.NEXT_PUBLIC_SHEET_CSV_URL || "/data.csv";
 
-// Sheet headers: Name, Photo, Age, Country, Interest, Net Worth
-// Headers are lowercased and spaces become "_" ("Net Worth" -> net_worth)
 type Row = {
   name: string;
   photo: string; // image URL
@@ -28,13 +25,11 @@ type LayoutName = "table" | "sphere" | "helix" | "grid";
 const LAYOUTS: LayoutName[] = ["table", "sphere", "helix", "grid"];
 
 // ---- Layout sizes (200 cards) ----
-const TABLE_COLUMNS = 20; // TABLE: 20 x 10
+const TABLE_COLUMNS = 20;
 const TABLE_ROWS = 10;
-const GRID = { x: 5, y: 4, z: 10 }; // GRID: 5 x 4 x 10
-const GRID_GAP = { x: 320, y: 300, z: 300 }; // space between grid cards
+const GRID = { x: 5, y: 4, z: 10 }; 
+const GRID_GAP = { x: 320, y: 300, z: 300 }; 
 
-// ---- Net worth -> tile color (colors live in globals.css) ----
-// Red: under $100K, Orange: $100K to $200K, Green: over $200K
 function parseNetWorth(text?: string): number | null {
   const cleaned = (text ?? "").replace(/[^0-9.-]/g, "");
   if (!cleaned) return null;
@@ -43,14 +38,13 @@ function parseNetWorth(text?: string): number | null {
 }
 
 function tierColor(netWorth: number | null): string {
-  if (netWorth === null) return "var(--line)"; // missing/invalid value
-  if (netWorth < 100000) return "var(--net-low)"; // red
-  if (netWorth <= 200000) return "var(--net-mid)"; // orange
-  return "var(--net-high)"; // green
+  if (netWorth === null) return "var(--line)";
+  if (netWorth < 100000) return "var(--net-low)";
+  if (netWorth <= 200000) return "var(--net-mid)";
+  return "var(--net-high)"; 
 }
 
 function buildScene(container: HTMLElement, rows: Row[]) {
-  // fall back to the window size if the container has no size yet
   const getSize = () => ({
     width: container.clientWidth || window.innerWidth,
     height: container.clientHeight || window.innerHeight,
@@ -65,7 +59,6 @@ function buildScene(container: HTMLElement, rows: Row[]) {
   camera.position.z = 3000;
 
   const scene = new THREE.Scene();
-  // Our own tween group: works the same in every tween.js version
   const group = new TWEEN.Group();
   const objects: CSS3DObject[] = [];
   const targets: Record<LayoutName, THREE.Object3D[]> = {
@@ -75,11 +68,9 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     grid: [],
   };
 
-  // One card per row of the sheet, plus its TABLE position
   rows.forEach((row, i) => {
     const element = document.createElement("div");
     element.className = "element";
-    // tile color by net worth (the CSS reads --tier)
     element.style.setProperty("--tier", tierColor(parseNetWorth(row.net_worth)));
 
     const photo = document.createElement("img");
@@ -87,9 +78,7 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     photo.alt = row.name ?? "";
     photo.decoding = "async";
     photo.referrerPolicy = "no-referrer";
-    // only accept http(s) links from the sheet
     if (/^https?:\/\//i.test(row.photo ?? "")) photo.src = row.photo;
-    // if the image can't load, hide it instead of showing a broken icon
     photo.onerror = () => {
       photo.style.visibility = "hidden";
     };
@@ -108,7 +97,6 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     worth.className = "worth";
     worth.textContent = row.net_worth ?? "";
 
-    // textContent (not innerHTML) so sheet content can't inject HTML
     element.append(photo, name, meta, worth);
 
     const card = new CSS3DObject(element);
@@ -120,7 +108,6 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     scene.add(card);
     objects.push(card);
 
-    // TABLE layout: 20 columns x 10 rows, centered
     const col = i % TABLE_COLUMNS;
     const line = Math.floor(i / TABLE_COLUMNS);
 
@@ -145,11 +132,10 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     targets.sphere.push(target);
   }
 
-  // HELIX layout: DOUBLE helix, two strands 180 degrees apart
   const perStrand = Math.ceil(count / 2);
   for (let i = 0; i < count; i++) {
-    const strand = i % 2; // 0 = first strand, 1 = second strand
-    const k = Math.floor(i / 2); // position along its strand
+    const strand = i % 2;
+    const k = Math.floor(i / 2);
     const theta = k * 0.35 + strand * Math.PI;
     const y = ((perStrand - 1) / 2 - k) * 16;
 
@@ -160,7 +146,6 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     targets.helix.push(target);
   }
 
-  // GRID layout: 5 (x) by 4 (y) by 10 (z) layers, first cards in front
   for (let i = 0; i < count; i++) {
     const col = i % GRID.x;
     const row = Math.floor(i / GRID.x) % GRID.y;
@@ -223,7 +208,7 @@ function buildScene(container: HTMLElement, rows: Row[]) {
     frameId = requestAnimationFrame(animate);
     group.update();
     controls.update();
-    render(); // draw every frame so the layout animation always shows
+    render();
   });
 
   transform("table");
@@ -258,7 +243,6 @@ export default function DashboardPage() {
       complete: (result) => {
         if (disposed) return;
         try {
-          // keep only rows that have a name
           const rows = result.data.filter((r) => r.name);
           if (rows.length === 0) {
             setStatus(
@@ -291,7 +275,6 @@ export default function DashboardPage() {
     <div className="scene-wrap">
       <div ref={containerRef} className="scene-container" />
 
-      {/* Shows what went wrong (loading, missing file, bad header, error) */}
       {status && (
         <div
           style={{
@@ -324,7 +307,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Net worth legend: red (low) -> orange -> green (high) */}
       <div
         className="legend"
         title="Net worth: red under $100K, orange $100K to $200K, green over $200K"
